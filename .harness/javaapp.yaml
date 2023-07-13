@@ -1,0 +1,46 @@
+pipeline:
+  name: java-app
+  identifier: javaapp
+  projectIdentifier: handalin
+  orgIdentifier: default
+  tags: {}
+  stages:
+    - stage:
+        name: java-app
+        identifier: javaapp
+        description: ""
+        type: Deployment
+        spec:
+          deploymentType: Kubernetes
+          service:
+            serviceRef: javaapp
+          environment:
+            environmentRef: javaapp
+            deployToAll: false
+            infrastructureDefinitions:
+              - identifier: javaapp
+          execution:
+            steps:
+              - step:
+                  name: Rollout Deployment
+                  identifier: rolloutDeployment
+                  type: K8sRollingDeploy
+                  timeout: 10m
+                  spec:
+                    skipDryRun: false
+                    pruningEnabled: false
+            rollbackSteps:
+              - step:
+                  name: Rollback Rollout Deployment
+                  identifier: rollbackRolloutDeployment
+                  type: K8sRollingRollback
+                  timeout: 10m
+                  spec:
+                    pruningEnabled: false
+        tags: {}
+        failureStrategies:
+          - onFailure:
+              errors:
+                - AllErrors
+              action:
+                type: StageRollback
